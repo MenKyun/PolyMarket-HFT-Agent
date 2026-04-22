@@ -1,0 +1,72 @@
+market:
+  # Binary market: subscribe to the YES and NO token IDs for the same condition.
+  yes_token_id: "REPLACE_WITH_YES_TOKEN_ID"
+  no_token_id: "REPLACE_WITH_NO_TOKEN_ID"
+  market_ws_url: "wss://ws-subscriptions-clob.polymarket.com/ws/market"
+  ws_ping_interval_sec: 10
+  book_stale_ms: 1500
+  custom_feature_enabled: true
+
+sources:
+  # The safest way to use external forecasts here is to point the bot at YOUR OWN
+  # normalized probability service. Each source should already output a probability_yes
+  # in [0, 1] for the specific Polymarket contract.
+  - name: "cryptoquant_model"
+    url: "https://your-internal-gateway.example.com/cryptoquant/btc-contract-probability"
+    probability_json_path: "data.probability_yes"
+    api_key_env: "CRYPTOQUANT_API_KEY"
+    api_key_header: "Authorization"
+    api_key_prefix: "Bearer "
+    weight: 0.6
+    poll_interval_ms: 500
+    request_timeout_ms: 1500
+    headers:
+      Accept: "application/json"
+
+  - name: "tradingview_derived_model"
+    url: "https://your-internal-gateway.example.com/tradingview/btc-contract-probability"
+    probability_json_path: "probability_yes"
+    api_key_env: "TRADINGVIEW_API_KEY"
+    api_key_header: "Authorization"
+    api_key_prefix: "Bearer "
+    weight: 0.4
+    poll_interval_ms: 500
+    request_timeout_ms: 1500
+    headers:
+      Accept: "application/json"
+
+strategy:
+  edge_threshold_bps: 30
+  exit_threshold_bps: 20
+  min_sources: 2
+  max_source_disagreement_bps: 60
+  rearm_ms: 750
+  min_top_level_liquidity: 25
+  max_midpoint_spread_bps: 500
+  trend_window: 64
+  fast_ema_alpha: 0.25
+  slow_ema_alpha: 0.05
+  trend_threshold_bps: 20
+
+risk:
+  max_capital_per_trade_pct: 0.005
+  daily_stop_pct: 0.02
+  chop_regime_multiplier: 0.5
+  trend_regime_multiplier: 1.5
+  flat_regime_multiplier: 1.0
+  max_asset_position_shares: 2500
+  fee_bps: 0
+  reserve_cash_pct: 0.10
+  allow_short_inventory: false
+
+account:
+  starting_cash_usd: 100000
+
+runtime:
+  paper_mode: true
+  allow_live_orders: false
+  log_level: "INFO"
+  logs_dir: "./logs"
+  health_interval_sec: 5
+  queue_maxsize: 100000
+  decision_loop_sleep_ms: 5
