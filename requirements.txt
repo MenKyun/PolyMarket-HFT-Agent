@@ -1,0 +1,3 @@
+aiohttp>=3.10.10
+PyYAML>=6.0.2
+uvloop>=0.20.0; platform_system != 'Windows'
